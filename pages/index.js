@@ -12,10 +12,14 @@ export default function Home() {
     setMetamaskClient(client);
   };
 
+  const handleRegistration = (isRegistered) => {
+    setIsConnected(isRegistered);
+  };
+
   return (
     <div>
       <h1>TestNet API Examples</h1>
-      <WalletConnect onConnect={handleWalletConnect} />
+      <WalletConnect onConnect={handleWalletConnect} onRegistered={handleRegistration} />
       {isConnected ? (
         <>
           <p>TODO - Token Contract</p>
