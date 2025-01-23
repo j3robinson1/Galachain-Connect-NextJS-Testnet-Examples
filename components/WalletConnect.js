@@ -19,9 +19,9 @@ const WalletConnect = ({ onConnect }) => {
       if (address.startsWith('0x')) {
         address = `eth|${address.slice(2)}`;
       }
+      await checkRegistration(address);
       setWalletAddress(address);
       onConnect(address, true, metamaskClient);
-      await checkRegistration(address);
     } catch (err) {
       console.error('Error connecting wallet:', err);
       onConnect('', false, null);
@@ -41,8 +41,7 @@ const WalletConnect = ({ onConnect }) => {
       }
     } catch (err) {
       if (err.response && err.response.status === 404) {
-        console.log('Object not found, trying again...');
-        await checkRegistration(address); // Retry logic
+        console.log('User Not Found');
       } else {
         console.error('Check registration error:', err);
         setIsRegistered(false);
@@ -58,7 +57,7 @@ const WalletConnect = ({ onConnect }) => {
 
   const getAdminSignature = async (dto) => {
     try {
-      const response = await axios.post(`/api/sign`, dto);
+      const response = await axios.post(`/api/signRegisterUser`, dto);
       return response.data.signature;
     } catch (err) {
       console.error('Error getting admin signature:', err);
