@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MintToken from './MintToken';
+import TransferToken from './TransferToken';
 
 const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
   const [allowances, setAllowances] = useState([]);
@@ -172,6 +173,11 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
 
           </div>
           <MintToken
+            tokenData={tokenData}
+            walletAddress={walletAddress}
+            metamaskClient={metamaskClient}
+          />
+          <TransferToken
             tokenData={tokenData}
             walletAddress={walletAddress}
             metamaskClient={metamaskClient}
