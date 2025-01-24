@@ -33,7 +33,8 @@ pnpm install
 Create a `.env` file in the root directory and add the following:
 
 ```plaintext
-NEXT_PUBLIC_TESTNET_PUBLIC_KEY_CONTRACT='https://gateway-testnet.galachain.com/<api root>'
+NEXT_PUBLIC_TESTNET_PUBLIC_KEY_CONTRACT='https://gateway-testnet.galachain.com/<api root public key contract>'
+NEXT_PUBLIC_TESTNET_TOKEN_CONTRACT='https://gateway-testnet.galachain.com/<api root token contract>'
 PRIVATE_KEY=<your private key>
 ```
 Replace <your project id> with your actual project ID.
