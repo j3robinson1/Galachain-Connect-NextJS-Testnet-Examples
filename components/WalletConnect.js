@@ -34,7 +34,7 @@ const WalletConnect = ({ onConnect, onRegistered }) => {
       const response = await getAlias(address);
       if (response.data.Data && response.data.Data.alias) {
         setIsRegistered(true);
-        setWalletAddress(`eth|${address.slice(2)}`)
+        setWalletAddress(`eth|${address.slice(2)}`);
         return true;
       } else {
         setIsRegistered(false);
@@ -69,13 +69,13 @@ const WalletConnect = ({ onConnect, onRegistered }) => {
       const dto = {
         publicKey: publicKey.publicKey,
         user: userAlias,
-        dtoType: 'RegisterEthUser'  // For backend to understand which DTO to instantiate
+        dtoType: 'RegisterEthUser'
       };
 
       const adminSignature = await getAdminSignature(dto);
       dto.signature = adminSignature;
 
-      delete dto.dtoType;  // Remove the dtoType before sending to the registration endpoint
+      delete dto.dtoType;
 
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_TESTNET_PUBLIC_KEY_CONTRACT}/RegisterEthUser`,

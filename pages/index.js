@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import WalletConnect from '../components/WalletConnect';
+import CreateTokenClass from '../components/CreateTokenClass';
+import ListTokenClasses from '../components/ListTokenClasses';
 
 export default function Home() {
   const [walletAddress, setWalletAddress] = useState('');
@@ -22,12 +24,8 @@ export default function Home() {
       <WalletConnect onConnect={handleWalletConnect} onRegistered={handleRegistration} />
       {isConnected ? (
         <>
-          <p>TODO - Token Contract</p>
-          <ul>
-            <li>Balance</li>
-            <li>Transfer</li>
-            <li>Burn</li>
-          </ul>
+          <CreateTokenClass walletAddress={`eth|${walletAddress.slice(2)}`} metamaskClient={metamaskClient} />
+          <ListTokenClasses />
         </>
       ) : (
         <p>Please connect your wallet.</p>
