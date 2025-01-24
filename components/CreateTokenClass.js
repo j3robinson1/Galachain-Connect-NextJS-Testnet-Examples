@@ -94,7 +94,6 @@ const CreateTokenClass = ({ walletAddress, metamaskClient }) => {
           if (key === "tokenClass") {
             return (
               <div key={key}>
-                <h3>{key}</h3>
                 {Object.keys(formValues[key]).map(subKey => (
                   <div key={subKey} className="input-group">
                     <label>{subKey}</label>

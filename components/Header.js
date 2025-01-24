@@ -1,14 +1,17 @@
+import React from 'react';
 import Link from 'next/link';
+import WalletConnect from './WalletConnect'; // Adjust path as necessary
 
 function Header() {
   return (
     <header>
       <nav>
-        <ul>
+        <ul style={{ display: 'flex', listStyle: 'none', margin: 0, padding: '10px', alignItems: 'center' }}>
+          <li style={{ flexGrow: 1 }}>
+            <Link href="/">Home</Link>
+          </li>
           <li>
-            <Link href="/">
-              Home
-            </Link>
+            <WalletConnect />
           </li>
         </ul>
       </nav>

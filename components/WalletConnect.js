@@ -1,31 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BrowserConnectClient } from '@gala-chain/connect';
+import { useWallet } from '../context/WalletContext';
 
-const WalletConnect = ({ onConnect, onRegistered }) => {
-  const [walletAddress, setWalletAddress] = useState('');
-  const [isRegistered, setIsRegistered] = useState(false);
+const WalletConnect = () => {
+  const {
+    walletAddress,
+    setWalletAddress,
+    metamaskClient,
+    setMetamaskClient,
+    isConnected,
+    setIsConnected,
+    setIsRegistered,
+  } = useWallet();
+
   const [isRegistering, setIsRegistering] = useState(false);
-  const [metamaskClient, setMetamaskClient] = useState(null);
 
   useEffect(() => {
     const client = new BrowserConnectClient();
     setMetamaskClient(client);
-  }, []);
+  }, [setMetamaskClient]);
 
   const connectWallet = async () => {
     try {
       await metamaskClient.connect();
-      let address = await metamaskClient.ethereumAddress;
+      const address = await metamaskClient.ethereumAddress;
       setWalletAddress(address);
       const isRegistered = await checkRegistration(address);
       if (!isRegistered) {
         await registerEthUser(address);
       }
-      onConnect(address, isRegistered, metamaskClient);
+      setIsConnected(true);
     } catch (err) {
       console.error('Error connecting wallet:', err);
-      onConnect('', false, null);
+      setWalletAddress('');
+      setIsConnected(false);
+      setMetamaskClient(null);
     }
   };
 
@@ -35,6 +45,7 @@ const WalletConnect = ({ onConnect, onRegistered }) => {
       if (response.data.Data && response.data.Data.alias) {
         setIsRegistered(true);
         setWalletAddress(`eth|${address.slice(2)}`);
+        setIsConnected(true);
         return true;
       } else {
         setIsRegistered(false);
@@ -69,7 +80,7 @@ const WalletConnect = ({ onConnect, onRegistered }) => {
       const dto = {
         publicKey: publicKey.publicKey,
         user: userAlias,
-        dtoType: 'RegisterEthUser'
+        dtoType: 'RegisterEthUser',
       };
 
       const adminSignature = await getAdminSignature(dto);
@@ -86,10 +97,10 @@ const WalletConnect = ({ onConnect, onRegistered }) => {
       setWalletAddress(response.data.Data);
       setIsRegistering(false);
       setIsRegistered(true);
-      onRegistered(true);
+      setIsConnected(true);
     } catch (err) {
       console.error('Error registering user:', err);
-      if (err.code === 4001) { 
+      if (err.code === 4001) {
         console.log('User cancelled the registration.');
       }
       setIsRegistering(false);
@@ -113,10 +124,10 @@ const WalletConnect = ({ onConnect, onRegistered }) => {
         <button onClick={connectWallet} className="button">Connect Wallet</button>
       ) : (
         <div>
-          <p className="wallet-address">Connected: {walletAddress}</p>
-          {!isRegistered && !isRegistering && (
+          {!isConnected && !isRegistering && (
             <button onClick={() => registerEthUser(walletAddress)} className="button">Register</button>
           )}
+          <span className="wallet-address">Connected: {walletAddress}</span>
           {isRegistering && <p>Registration in progress...</p>}
         </div>
       )}

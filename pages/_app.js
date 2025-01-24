@@ -1,13 +1,17 @@
 import React from 'react';
 import Header from '../components/Header';
+import { WalletProvider } from '../context/WalletContext';
 import '../styles/styles.css';
 
 function MyApp({ Component, pageProps }) {
+
   return (
-    <div className="container">
-      <Header />
-      <Component {...pageProps} />
-    </div>
+    <WalletProvider>
+      <div className="container">
+        <Header />
+        <Component {...pageProps} />
+      </div>
+    </WalletProvider>
   );
 }
 
