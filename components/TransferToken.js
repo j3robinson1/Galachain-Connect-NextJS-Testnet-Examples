@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 const TransferToken = ({ tokenData, walletAddress, metamaskClient }) => {
   const [formValues, setFormValues] = useState({
     uniqueKey: `transfer-token-${new Date().toISOString()}`,
-    quantity: '0',
+    quantity: '',
     from: walletAddress,
-    to: "eth|address",
+    to: "",
     tokenInstance: {
       additionalKey: tokenData.additionalKey,
       category: tokenData.category,
@@ -20,7 +20,10 @@ const TransferToken = ({ tokenData, walletAddress, metamaskClient }) => {
   const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    if (value === '0' || value.startsWith('0')) {
+      value = value.replace(/^0+/, ''); // Remove leading zeros
+    }
     setFormValues((prev) => ({
       ...prev,
       [name]: value,

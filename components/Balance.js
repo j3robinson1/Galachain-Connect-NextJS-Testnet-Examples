@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import MintToken from './MintToken';
 import TransferToken from './TransferToken';
+import LockToken from './LockToken';
+import UnlockToken from './UnlockToken';
 
 const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
   const [allowances, setAllowances] = useState([]);
   const [balances, setBalances] = useState([]);
+  const [totalLockedQuantity, setTotalLockedQuantity] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -72,9 +75,26 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
       }
 
       const data = await response.json();
-      setBalances(data.Data.results || []);
+      const results = data.Data.results || [];
+
+      // Calculate the total locked quantity
+      const totalLocked = results.reduce((sum, balance) => {
+        if (Array.isArray(balance.balance.lockedHolds)) {
+          return (
+            sum +
+            balance.balance.lockedHolds.reduce(
+              (lockedSum, lockedHold) => lockedSum + parseFloat(lockedHold.quantity || 0),
+              0
+            )
+          );
+        }
+        return sum;
+      }, 0);
+
+      setBalances(results);
+      setTotalLockedQuantity(totalLocked);
     } catch (err) {
-      console.error('Error fetching allowances:', err);
+      console.error('Error fetching balances:', err);
       setError(err.message || 'Failed to fetch balances');
     } finally {
       setIsLoading(false);
@@ -85,6 +105,20 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
     fetchAllowance();
     fetchBalance();
   }, [tokenData, walletAddress]);
+
+  function compileLockName(lockedHold) {
+    const { collection, category, type } = tokenData;
+    const instanceId = lockedHold.instanceId || '0';
+    const quantity = lockedHold.quantity || '0';
+    const lockAuthority = lockedHold.lockAuthority || walletAddress;
+    const owner = walletAddress;
+    const createdDate = new Date(lockedHold.created)
+      .toISOString()
+      .slice(0, 16)
+      .replace('T', '-');
+
+    return `lock-${collection}-${category}-${type}-${instanceId}-${quantity}-${owner}-${lockAuthority}-${createdDate}`;
+  }
 
   return (
     <div className="holdings">
@@ -102,15 +136,16 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
               </thead>
               <tbody>
                 {allowances.length > 0 ? (
-                  allowances.map((allowance, index) => (
-                    <tr key={index}>
-                      <td>
-                        {allowance.quantity && allowance.quantitySpent
+                  <tr>
+                    <td>
+                      {allowances.reduce((total, allowance) => {
+                        const remaining = allowance.quantity && allowance.quantitySpent
                           ? parseFloat(allowance.quantity) - parseFloat(allowance.quantitySpent)
-                          : 'N/A'}
-                      </td>
-                    </tr>
-                  ))
+                          : 0;
+                        return total + remaining;
+                      }, 0)}
+                    </td>
+                  </tr>
                 ) : (
                   <tr>
                     <td>0</td>
@@ -124,16 +159,27 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
               <table>
                 <thead>
                   <tr>
-                    <th>Minted</th>
+                    <th>Minted (Available after locks)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {balances.length > 0 ? (
-                    balances.map((balance, index) => (
-                      <tr key={index}>
-                        <td>{balance.balance.quantity || 'N/A'}</td>
-                      </tr>
-                    ))
+                    balances.map((balance, index) => {
+                      const totalLocked = Array.isArray(balance.balance.lockedHolds)
+                        ? balance.balance.lockedHolds.reduce(
+                            (sum, lockedHold) => sum + parseFloat(lockedHold.quantity || 0),
+                            0
+                          )
+                        : 0;
+
+                      const availableBalance = parseFloat(balance.balance.quantity || 0) - totalLocked;
+
+                      return (
+                        <tr key={index}>
+                          <td>{availableBalance > 0 ? availableBalance : 0}</td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
                       <td>0</td>
@@ -148,20 +194,31 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
                 <thead>
                   <tr>
                     <th>Locked</th>
+                    <th>Created</th>
                   </tr>
                 </thead>
                 <tbody>
                   {balances.length > 0 ? (
-                    balances.map((balance, index) => (
-                      <tr key={index}>
-                        <td>
-                          {Array.isArray(balance.balance.lockedHolds) &&
-                          balance.balance.lockedHolds.length === 0
-                            ? 0
-                            : balance.balance.lockedHolds || 'N/A'}
-                        </td>
-                      </tr>
-                    ))
+                    (() => {
+                      const totalLocked = balances.reduce((sum, balance) => {
+                        if (Array.isArray(balance.balance.lockedHolds)) {
+                          return (
+                            sum +
+                            balance.balance.lockedHolds.reduce(
+                              (lockedSum, lockedHold) => lockedSum + parseFloat(lockedHold.quantity || 0),
+                              0
+                            )
+                          );
+                        }
+                        return sum;
+                      }, 0);
+
+                      return (
+                        <tr>
+                          <td>{totalLocked > 0 ? totalLocked : 0}</td>
+                        </tr>
+                      );
+                    })()
                   ) : (
                     <tr>
                       <td>0</td>
@@ -170,13 +227,34 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
                 </tbody>
               </table>
             </div>
-
           </div>
           <MintToken
             tokenData={tokenData}
             walletAddress={walletAddress}
             metamaskClient={metamaskClient}
           />
+          <LockToken
+            tokenData={tokenData}
+            walletAddress={walletAddress}
+            metamaskClient={metamaskClient}
+          />
+          {totalLockedQuantity > 0 && (
+            <UnlockToken
+              lockInfo={{
+                quantity: totalLockedQuantity,
+                lockAuthority: walletAddress,
+                name: compileLockName({
+                  instanceId: '0', // Assuming instanceId is '0' for aggregated locks
+                  quantity: totalLockedQuantity,
+                  lockAuthority: walletAddress,
+                  created: new Date().getTime(), // Use the current timestamp for the name
+                }),
+              }}
+              tokenData={tokenData}
+              walletAddress={walletAddress}
+              metamaskClient={metamaskClient}
+            />
+          )}
           <TransferToken
             tokenData={tokenData}
             walletAddress={walletAddress}
