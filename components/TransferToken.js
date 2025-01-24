@@ -22,7 +22,7 @@ const TransferToken = ({ tokenData, walletAddress, metamaskClient }) => {
   const handleChange = (e) => {
     let { name, value } = e.target;
     if (value === '0' || value.startsWith('0')) {
-      value = value.replace(/^0+/, ''); // Remove leading zeros
+      value = value.replace(/^0+/, '');
     }
     setFormValues((prev) => ({
       ...prev,
@@ -43,7 +43,6 @@ const TransferToken = ({ tokenData, walletAddress, metamaskClient }) => {
     }
 
     try {
-      // Ensure MetaMask is connected
       const accounts = await metamaskClient.connect();
       if (!accounts || accounts.length === 0) {
         throw new Error('No account connected');
@@ -52,7 +51,6 @@ const TransferToken = ({ tokenData, walletAddress, metamaskClient }) => {
       setIsProcessing(true);
       console.log('Form values:', formValues);
 
-      // Sign the DTO with MetaMask
       const signedDto = await metamaskClient.sign('TransferToken', formValues);
 
       console.log('Signed DTO:', signedDto);

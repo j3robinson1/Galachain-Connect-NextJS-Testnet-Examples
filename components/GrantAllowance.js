@@ -81,7 +81,6 @@ const GrantAllowance = ({ tokenData, walletAddress, metamaskClient }) => {
     }
 
     try {
-      // Check if MetaMask is connected
       const accounts = await metamaskClient.connect();
       if (!accounts || accounts.length === 0) {
         throw new Error("No account connected");
@@ -90,7 +89,6 @@ const GrantAllowance = ({ tokenData, walletAddress, metamaskClient }) => {
       setIsProcessing(true);
       console.log("Form values:", formValues);
 
-      // Sign the DTO with MetaMask
       const signedDto = await metamaskClient.sign("GrantAllowance", formValues);
 
       console.log("Signed DTO:", signedDto);

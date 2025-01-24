@@ -25,7 +25,7 @@ const LockToken = ({ tokenData, walletAddress, metamaskClient }) => {
   const [success, setSuccess] = useState('');
 
   function roundToNearestMinute(timestamp) {
-    return Math.round(timestamp / 60000) * 60000; // Round to the nearest minute
+    return Math.round(timestamp / 60000) * 60000;
   }
 
   function generateLockName(values) {
@@ -35,7 +35,6 @@ const LockToken = ({ tokenData, walletAddress, metamaskClient }) => {
     const lockAuthority = walletAddress || 'unknown';
     const instance = '0';
 
-    // Use rounded timestamp for better alignment
     const roundedTimestamp = roundToNearestMinute(Date.now());
     const formattedDate = new Date(roundedTimestamp)
       .toISOString()
@@ -48,7 +47,7 @@ const LockToken = ({ tokenData, walletAddress, metamaskClient }) => {
   const handleChange = (e) => {
     let { name, value } = e.target;
     if (value === '0' || value.startsWith('0')) {
-      value = value.replace(/^0+/, ''); // Remove leading zeros
+      value = value.replace(/^0+/, ''); 
     }
 
     setFormValues((prev) => {
@@ -80,15 +79,13 @@ const LockToken = ({ tokenData, walletAddress, metamaskClient }) => {
 
       setIsProcessing(true);
 
-      // Ensure the lock name uses the same rounded timestamp before submission
       const finalFormValues = {
         ...formValues,
-        name: generateLockName(formValues), // Regenerate to ensure alignment
+        name: generateLockName(formValues),
       };
 
       console.log('Final Form Values:', finalFormValues);
 
-      // Sign the DTO with MetaMask
       const signedDto = await metamaskClient.sign('LockToken', finalFormValues);
 
       const response = await fetch(

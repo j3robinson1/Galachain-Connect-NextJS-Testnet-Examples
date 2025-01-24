@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
 
-const MintToken = ({ tokenData, walletAddress, metamaskClient }) => {
+const BurnToken = ({ tokenData, walletAddress, metamaskClient }) => {
   const [formValues, setFormValues] = useState({
-    uniqueKey: `mint-token-${new Date().toISOString()}`,
-    quantity: '',
-    tokenClass: {
-      additionalKey: tokenData.additionalKey,
-      category: tokenData.category,
-      collection: tokenData.collection,
-      instance: '0',
-      type: tokenData.type,
-    },
+    uniqueKey: `burn-token-${new Date().toISOString()}`,
+    owner: walletAddress,
+    tokenInstances: [
+      {
+        quantity: '',
+        tokenInstanceKey: {
+          additionalKey: tokenData.additionalKey,
+          category: tokenData.category,
+          collection: tokenData.collection,
+          instance: '0',
+          type: tokenData.type,
+        },
+      },
+    ],
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -18,23 +23,29 @@ const MintToken = ({ tokenData, walletAddress, metamaskClient }) => {
   const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
-    let { name, value } = e.target;
+    let { value } = e.target;
+
     if (value === '0' || value.startsWith('0')) {
       value = value.replace(/^0+/, '');
     }
+
     setFormValues((prev) => ({
       ...prev,
-      [name]: value,
+      tokenInstances: prev.tokenInstances.map((instance, index) => ({
+        ...instance,
+        quantity: value,
+      })),
     }));
   };
 
   const isValidForm = () => {
     const isQuantityValid =
-      formValues.quantity && parseFloat(formValues.quantity) > 0;
+      formValues.tokenInstances[0].quantity &&
+      parseFloat(formValues.tokenInstances[0].quantity) > 0;
     return isQuantityValid;
   };
 
-  const mintToken = async () => {
+  const burnTokens = async () => {
     if (!isValidForm() || !walletAddress || !metamaskClient) {
       console.error('Invalid form or wallet not connected');
       return;
@@ -49,12 +60,12 @@ const MintToken = ({ tokenData, walletAddress, metamaskClient }) => {
       setIsProcessing(true);
       console.log('Form values:', formValues);
 
-      const signedDto = await metamaskClient.sign('MintToken', formValues);
+      const signedDto = await metamaskClient.sign('BurnTokens', formValues);
 
       console.log('Signed DTO:', signedDto);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_TESTNET_TOKEN_CONTRACT}/MintToken`,
+        `${process.env.NEXT_PUBLIC_TESTNET_TOKEN_CONTRACT}/BurnTokens`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -63,43 +74,48 @@ const MintToken = ({ tokenData, walletAddress, metamaskClient }) => {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to mint token');
+        throw new Error('Failed to burn token');
       }
 
       const responseData = await response.json();
-      console.log('Token minted successfully:', responseData);
+      console.log('Token burned successfully:', responseData);
 
       setSuccess(
-        `Successfully minted ${formValues.quantity} ${tokenData.type} tokens!`
+        `Successfully burned ${formValues.tokenInstances[0].quantity} ${tokenData.type} tokens!`
       );
+
+      setFormValues((prev) => ({
+        ...prev,
+        tokenInstances: prev.tokenInstances.map((instance) => ({
+          ...instance,
+          quantity: '',
+        })),
+      }));
     } catch (err) {
-      console.error(`Error minting token: ${err}`, err);
-      setError(err.message || 'Failed to mint token');
+      console.error(`Error burning token: ${err}`, err);
+      setError(err.message || 'Failed to burn token');
     } finally {
       setIsProcessing(false);
     }
   };
 
   return (
-    <div className="mint-token-container">
-      <h2>Mint {tokenData.type} Token</h2>
+    <div className="burn-token-container">
+      <h2>Burn {tokenData.type} Token</h2>
       <div className="form">
         <div className="input-group">
           <label>Quantity</label>
           <input
             type="text"
             name="quantity"
-            value={formValues.quantity}
+            value={formValues.tokenInstances[0].quantity || ''}
             onChange={handleChange}
-            placeholder="Enter quantity to mint"
+            placeholder="Enter quantity to burn"
             disabled={isProcessing}
           />
         </div>
-        <button
-          onClick={mintToken}
-          disabled={!isValidForm() || isProcessing}
-        >
-          {isProcessing ? 'Processing...' : 'Mint Token'}
+        <button onClick={burnTokens} disabled={!isValidForm() || isProcessing}>
+          {isProcessing ? 'Processing...' : 'Burn Token'}
         </button>
         {error && <p className="error">{error}</p>}
         {success && <p className="success">{success}</p>}
@@ -108,4 +124,4 @@ const MintToken = ({ tokenData, walletAddress, metamaskClient }) => {
   );
 };
 
-export default MintToken;
+export default BurnToken;

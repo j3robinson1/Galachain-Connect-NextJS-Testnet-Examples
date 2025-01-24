@@ -3,10 +3,12 @@ import MintToken from './MintToken';
 import TransferToken from './TransferToken';
 import LockToken from './LockToken';
 import UnlockToken from './UnlockToken';
+import BurnToken from './BurnToken';
 
 const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
   const [allowances, setAllowances] = useState([]);
   const [balances, setBalances] = useState([]);
+  const [burns, setBurns] = useState([]);
   const [totalLockedQuantity, setTotalLockedQuantity] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -77,7 +79,6 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
       const data = await response.json();
       const results = data.Data.results || [];
 
-      // Calculate the total locked quantity
       const totalLocked = results.reduce((sum, balance) => {
         if (Array.isArray(balance.balance.lockedHolds)) {
           return (
@@ -101,9 +102,47 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
     }
   };
 
+  const fetchBurns = async () => {
+    if (!tokenData || !walletAddress) return;
+
+    setIsLoading(true);
+    setError('');
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_TESTNET_TOKEN_CONTRACT}/FetchBurns`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            burnedBy: walletAddress,
+            additionalKey: tokenData.additionalKey,
+            category: tokenData.category,
+            collection: tokenData.collection,
+            grantedTo: walletAddress,
+            type: tokenData.type,
+            instance: '0',
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch allowances');
+      }
+
+      const data = await response.json();
+      setBurns(data.Data || []);
+    } catch (err) {
+      console.error('Error fetching allowances:', err);
+      setError(err.message || 'Failed to fetch balances');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchAllowance();
     fetchBalance();
+    fetchBurns();
   }, [tokenData, walletAddress]);
 
   function compileLockName(lockedHold) {
@@ -228,6 +267,34 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
               </table>
             </div>
           </div>
+          <div className="burned-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Total Burned</th>
+                </tr>
+              </thead>
+              <tbody>
+                {burns.length > 0 ? (
+                  (() => {
+                    const totalBurned = burns.reduce((sum, burn) => {
+                      return sum + parseFloat(burn.quantity || 0);
+                    }, 0);
+
+                    return (
+                      <tr>
+                        <td>{totalBurned > 0 ? totalBurned : 0}</td>
+                      </tr>
+                    );
+                  })()
+                ) : (
+                  <tr>
+                    <td>0</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
           <MintToken
             tokenData={tokenData}
             walletAddress={walletAddress}
@@ -244,10 +311,10 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
                 quantity: totalLockedQuantity,
                 lockAuthority: walletAddress,
                 name: compileLockName({
-                  instanceId: '0', // Assuming instanceId is '0' for aggregated locks
+                  instanceId: '0', 
                   quantity: totalLockedQuantity,
                   lockAuthority: walletAddress,
-                  created: new Date().getTime(), // Use the current timestamp for the name
+                  created: new Date().getTime(),
                 }),
               }}
               tokenData={tokenData}
@@ -256,6 +323,11 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
             />
           )}
           <TransferToken
+            tokenData={tokenData}
+            walletAddress={walletAddress}
+            metamaskClient={metamaskClient}
+          />
+          <BurnToken
             tokenData={tokenData}
             walletAddress={walletAddress}
             metamaskClient={metamaskClient}

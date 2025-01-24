@@ -9,7 +9,7 @@ const UnlockToken = ({ lockInfo, tokenData, walletAddress, metamaskClient }) => 
   const handleChange = (e) => {
     let { value } = e.target;
     if (value === '0' || value.startsWith('0')) {
-      value = value.replace(/^0+/, ''); // Remove leading zeros
+      value = value.replace(/^0+/, '');
     }
     setUnlockQuantity(value);
   };
@@ -28,7 +28,6 @@ const UnlockToken = ({ lockInfo, tokenData, walletAddress, metamaskClient }) => 
     try {
       setIsProcessing(true);
 
-      // Prepare lock data for signing
       const lockData = {
         name: lockInfo.name,
         quantity: unlockQuantity,
@@ -44,11 +43,9 @@ const UnlockToken = ({ lockInfo, tokenData, walletAddress, metamaskClient }) => 
         uniqueKey: `unlock-${lockInfo.name}`,
       };
 
-      // Sign the DTO with MetaMask
       const signedDto = await metamaskClient.sign('UnlockToken', lockData);
       console.log('Signed DTO:', signedDto);
 
-      // Send unlock request
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_TESTNET_TOKEN_CONTRACT}/UnlockToken`,
         {
@@ -66,7 +63,7 @@ const UnlockToken = ({ lockInfo, tokenData, walletAddress, metamaskClient }) => 
       console.log('Token unlocked successfully:', responseData);
 
       setSuccess(`Successfully unlocked ${unlockQuantity} tokens!`);
-      setUnlockQuantity(''); // Clear the input after success
+      setUnlockQuantity('');
     } catch (err) {
       console.error('Error unlocking token:', err);
       setError(err.message || 'Failed to unlock token');

@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import WalletConnect from './WalletConnect'; // Adjust path as necessary
+import WalletConnect from './WalletConnect';
 
 function Header() {
   return (
