@@ -6,7 +6,7 @@ import Balance from '../../../../components/Balance';
 
 const ManageToken = () => {
   const router = useRouter();
-  const { walletAddress, metamaskClient, isConnected } = useWallet();
+  const { walletAddress, metamaskClient, isConnected, isRegistered } = useWallet();
   const { collection, category, type } = router.query;
 
   const [tokenClasses, setTokenClasses] = useState([]);
@@ -110,7 +110,7 @@ const ManageToken = () => {
           </div>
         )}
       </div>
-      {isConnected && tokenData ? (
+      {isConnected && isRegistered && tokenData ? (
         <>
           <GrantAllowance
             tokenData={tokenData}
@@ -124,7 +124,7 @@ const ManageToken = () => {
           />
         </>
       ) : (
-        <p>Please connect your wallet to manage tokens.</p>
+        <p>Connect & Register your wallet</p>
       )}
     </>
   );

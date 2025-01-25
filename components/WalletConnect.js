@@ -11,6 +11,7 @@ const WalletConnect = () => {
     setMetamaskClient,
     isConnected,
     setIsConnected,
+    isRegistered,
     setIsRegistered,
   } = useWallet();
 
@@ -42,9 +43,10 @@ const WalletConnect = () => {
   const checkRegistration = async (address) => {
     try {
       const response = await getAlias(address);
+      console.log(response);
       if (response.data.Data && response.data.Data.alias) {
         setIsRegistered(true);
-        setWalletAddress(`eth|${address.slice(2)}`);
+        setWalletAddress(response.data.Data.alias);
         setIsConnected(true);
         return true;
       } else {
@@ -124,7 +126,7 @@ const WalletConnect = () => {
         <button onClick={connectWallet} className="button">Connect Wallet</button>
       ) : (
         <div>
-          {!isConnected && !isRegistering && (
+          {isConnected && !isRegistering && !isRegistered && (
             <button onClick={() => registerEthUser(walletAddress)} className="button">Register</button>
           )}
           <span className="wallet-address">Connected: {walletAddress}</span>

@@ -5,18 +5,17 @@ import CreateTokenClass from '../components/CreateTokenClass';
 import ListTokenClasses from '../components/ListTokenClasses';
 
 export default function Home() {
-  const { walletAddress, metamaskClient, isConnected } = useWallet();
+  const { walletAddress, metamaskClient, isConnected, isRegistered } = useWallet();
 
   return (
     <div>
-      <h1>TestNet API Examples</h1>
-      {isConnected ? (
+      <ListTokenClasses />
+      {isConnected && isRegistered ? (
         <>
           <CreateTokenClass walletAddress={walletAddress} metamaskClient={metamaskClient} />
-          <ListTokenClasses />
         </>
       ) : (
-        <p>Please connect your wallet.</p>
+        <p>Connect & Register your wallet.</p>
       )}
     </div>
   );
