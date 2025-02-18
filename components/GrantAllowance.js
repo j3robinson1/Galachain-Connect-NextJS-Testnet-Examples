@@ -110,7 +110,7 @@ const GrantAllowance = ({ tokenData, walletAddress, metamaskClient }) => {
       console.log('Allowance granted successfully:', responseData);
 
       setSuccess(
-        `Allowance of ${formValues.quantities[0].quantity} GALA granted to ${formValues.quantities[0].user} successfully!`
+        `Allowance of ${formValues.quantities[0].quantity} ${tokenData.type} granted to ${formValues.quantities[0].user} successfully!`
       );
     } catch (err) {
       console.error(`Error granting allowance: ${err}`, err);

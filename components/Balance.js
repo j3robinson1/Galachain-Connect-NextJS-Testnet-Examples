@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import MintToken from './MintToken';
 import TransferToken from './TransferToken';
 import LockToken from './LockToken';
@@ -13,9 +14,11 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const router = useRouter();
+  const { id: queryId } = router.query; // get the id from URL
+
   const fetchAllowance = async () => {
     if (!tokenData || !walletAddress) return;
-
     setIsLoading(true);
     setError('');
     try {
@@ -34,11 +37,9 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
           }),
         }
       );
-
       if (!response.ok) {
         throw new Error('Failed to fetch allowances');
       }
-
       const data = await response.json();
       setAllowances(data.Data.results || []);
     } catch (err) {
@@ -51,7 +52,6 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
 
   const fetchBalance = async () => {
     if (!tokenData || !walletAddress) return;
-
     setIsLoading(true);
     setError('');
     try {
@@ -71,11 +71,9 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
           }),
         }
       );
-
       if (!response.ok) {
         throw new Error('Failed to fetch allowances');
       }
-
       const data = await response.json();
       const results = data.Data.results || [];
 
@@ -104,7 +102,6 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
 
   const fetchBurns = async () => {
     if (!tokenData || !walletAddress) return;
-
     setIsLoading(true);
     setError('');
     try {
@@ -124,11 +121,9 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
           }),
         }
       );
-
       if (!response.ok) {
         throw new Error('Failed to fetch allowances');
       }
-
       const data = await response.json();
       setBurns(data.Data || []);
     } catch (err) {
@@ -155,9 +150,17 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
       .toISOString()
       .slice(0, 16)
       .replace('T', '-');
-
     return `lock-${collection}-${category}-${type}-${instanceId}-${quantity}-${owner}-${lockAuthority}-${createdDate}`;
   }
+
+  // Get instance IDs from balances (if available)
+  const instanceIds =
+    balances.length > 0 &&
+    balances[0].balance &&
+    Array.isArray(balances[0].balance.instanceIds) &&
+    balances[0].balance.instanceIds.length > 0
+      ? balances[0].balance.instanceIds
+      : [];
 
   return (
     <div className="holdings">
@@ -178,9 +181,10 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
                   <tr>
                     <td>
                       {allowances.reduce((total, allowance) => {
-                        const remaining = allowance.quantity && allowance.quantitySpent
-                          ? parseFloat(allowance.quantity) - parseFloat(allowance.quantitySpent)
-                          : 0;
+                        const remaining =
+                          allowance.quantity && allowance.quantitySpent
+                            ? parseFloat(allowance.quantity) - parseFloat(allowance.quantitySpent)
+                            : 0;
                         return total + remaining;
                       }, 0)}
                     </td>
@@ -193,6 +197,7 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
               </tbody>
             </table>
           </div>
+
           <div className="balances-table">
             <div className="minted-table">
               <table>
@@ -210,9 +215,7 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
                             0
                           )
                         : 0;
-
                       const availableBalance = parseFloat(balance.balance.quantity || 0) - totalLocked;
-
                       return (
                         <tr key={index}>
                           <td>{availableBalance > 0 ? availableBalance : 0}</td>
@@ -251,10 +254,10 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
                         }
                         return sum;
                       }, 0);
-
                       return (
                         <tr>
                           <td>{totalLocked > 0 ? totalLocked : 0}</td>
+                          <td>{/* Optionally, show created date here */}</td>
                         </tr>
                       );
                     })()
@@ -267,34 +270,63 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
               </table>
             </div>
           </div>
-          <div className="burned-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Total Burned</th>
-                </tr>
-              </thead>
-              <tbody>
-                {burns.length > 0 ? (
-                  (() => {
-                    const totalBurned = burns.reduce((sum, burn) => {
-                      return sum + parseFloat(burn.quantity || 0);
-                    }, 0);
 
+          {instanceIds.length > 0 && (
+            <div className="instanceids-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Collection</th>
+                    <th>
+                      {tokenData.additionalKey && tokenData.additionalKey.startsWith('/')
+                        ? ''
+                        : 'Rarity'}
+                    </th>
+                    <th>Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {instanceIds.map((instanceId, idx) => {
+                    const segment = tokenData.additionalKey.startsWith('/')
+                      ? 'ERC721/' + instanceId
+                      : tokenData.additionalKey + '/' + instanceId;
                     return (
-                      <tr>
-                        <td>{totalBurned > 0 ? totalBurned : 0}</td>
+                      <tr
+                        key={idx}
+                        onClick={() =>
+                          router.push(
+                            `/manage/${tokenData.collection}/${tokenData.category}/${tokenData.type}/${segment}`
+                          )
+                        }
+                        style={{ cursor: 'pointer' }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.backgroundColor = '#313131')
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.backgroundColor = 'transparent')
+                        }
+                      >
+                        <td>{instanceId}</td>
+                        <td>{tokenData.type || 'N/A'}</td>
+                        <td>{tokenData.category || 'N/A'}</td>
+                        <td>{tokenData.collection || 'N/A'}</td>
+                        <td>
+                          {tokenData.additionalKey && tokenData.additionalKey.startsWith('/')
+                            ? ''
+                            : tokenData.additionalKey || 'N/A'}
+                        </td>
+                        <td>{tokenData.additionalKey.startsWith('/') ? 'ERC721' : 'ERC1155'}</td>
                       </tr>
                     );
-                  })()
-                ) : (
-                  <tr>
-                    <td>0</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
           <MintToken
             tokenData={tokenData}
             walletAddress={walletAddress}
@@ -311,7 +343,7 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
                 quantity: totalLockedQuantity,
                 lockAuthority: walletAddress,
                 name: compileLockName({
-                  instanceId: '0', 
+                  instanceId: '0',
                   quantity: totalLockedQuantity,
                   lockAuthority: walletAddress,
                   created: new Date().getTime(),

@@ -17,9 +17,7 @@ const ListTokenClasses = () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify({
-            category: 'Unit',
-            collection: 'Token',
-            limit: 10000,
+            limit: 10000
           }),
         }
       );
@@ -42,6 +40,32 @@ const ListTokenClasses = () => {
     fetchTokenClasses();
   }, []);
 
+  // Group token classes by collection, category and symbol.
+  const groupedTokenClasses = tokenClasses.reduce((acc, tokenClass) => {
+    // Create a grouping key.
+    const key = `${tokenClass.collection}-${tokenClass.category}-${tokenClass.symbol}`;
+    if (!acc[key]) {
+      acc[key] = {
+        ...tokenClass,
+        // Make a copy of authorities so we can combine later.
+        authorities: tokenClass.authorities ? [...tokenClass.authorities] : []
+      };
+    } else {
+      // Combine authorities, removing duplicates.
+      if (tokenClass.authorities) {
+        acc[key].authorities = Array.from(
+          new Set([...acc[key].authorities, ...tokenClass.authorities])
+        );
+      }
+      // If needed, you can combine additional fields here.
+      // For example, you might concatenate descriptions or sum maxSupply.
+    }
+    return acc;
+  }, {});
+
+  // Convert the grouped results to an array.
+  const groupedResults = Object.values(groupedTokenClasses);
+
   const handleRowClick = (tokenClass) => {
     router.push(
       `/manage/${tokenClass.collection}/${tokenClass.category}/${tokenClass.type}`
@@ -55,21 +79,20 @@ const ListTokenClasses = () => {
       {error && <p className="error">{error}</p>}
       {!isLoading && !error && (
         <div className="token-classes-table">
-          {tokenClasses.length > 0 ? (
+          {groupedResults.length > 0 ? (
             <table>
               <thead>
                 <tr>
                   <th>Symbol</th>
                   <th>Category</th>
                   <th>Collection</th>
-                  <th>Decimals</th>
                   <th>Description</th>
                   <th>Max Supply</th>
                   <th>Authorities</th>
                 </tr>
               </thead>
               <tbody>
-                {tokenClasses.map((tokenClass, index) => (
+                {groupedResults.map((tokenClass, index) => (
                   <tr
                     key={index}
                     onClick={() => handleRowClick(tokenClass)}
@@ -84,7 +107,6 @@ const ListTokenClasses = () => {
                     <td>{tokenClass.symbol || 'N/A'}</td>
                     <td>{tokenClass.category || 'N/A'}</td>
                     <td>{tokenClass.collection || 'N/A'}</td>
-                    <td>{tokenClass.decimals || 'N/A'}</td>
                     <td>{tokenClass.description || 'N/A'}</td>
                     <td>{tokenClass.maxSupply || 'N/A'}</td>
                     <td>

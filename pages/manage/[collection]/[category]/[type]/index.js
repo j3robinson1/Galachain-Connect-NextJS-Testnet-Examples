@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useWallet } from '../../../../context/WalletContext';
-import GrantAllowance from '../../../../components/GrantAllowance';
-import Balance from '../../../../components/Balance';
+import { useWallet } from '../../../../../context/WalletContext';
+import GrantAllowance from '../../../../../components/GrantAllowance';
+import Balance from '../../../../../components/Balance';
 
 const ManageToken = () => {
   const router = useRouter();
@@ -40,10 +40,9 @@ const ManageToken = () => {
 
       const data = await response.json();
       const results = data.Data.results || [];
-
       setTokenClasses(results);
 
-      if (results.length > 0) {
+      if (results.length === 1) {
         const firstTokenClass = results[0];
         setTokenData({
           additionalKey: firstTokenClass.additionalKey,
@@ -51,6 +50,7 @@ const ManageToken = () => {
           collection: firstTokenClass.collection,
           type: firstTokenClass.type,
           instance: firstTokenClass.instance,
+          authorities: firstTokenClass.authorities,
         });
       }
     } catch (err) {
@@ -65,6 +65,14 @@ const ManageToken = () => {
     fetchTokenClasses();
   }, [collection, category, type]);
 
+  const isMultiple = tokenClasses.length > 1;
+
+  const handleRowClick = (tokenClass) => {
+    router.push(
+      `/manage/${tokenClass.collection}/${tokenClass.category}/${tokenClass.type}/${tokenClass.additionalKey}`
+    );
+  };
+
   return (
     <>
       <div className="list-token-classes">
@@ -77,10 +85,11 @@ const ManageToken = () => {
               <table>
                 <thead>
                   <tr>
+                    <th>Image</th>
                     <th>Symbol</th>
                     <th>Category</th>
                     <th>Collection</th>
-                    <th>Decimals</th>
+                    <th>Additional Key</th>
                     <th>Description</th>
                     <th>Max Supply</th>
                     <th>Authorities</th>
@@ -88,11 +97,18 @@ const ManageToken = () => {
                 </thead>
                 <tbody>
                   {tokenClasses.map((tokenClass, index) => (
-                    <tr key={index}>
+                    <tr
+                      key={index}
+                      onClick={ isMultiple ? () => handleRowClick(tokenClass) : undefined }
+                      style={{ cursor: isMultiple ? 'pointer' : 'default' }}
+                      onMouseEnter={ isMultiple ? (e) => { e.currentTarget.style.backgroundColor = '#313131'; } : undefined }
+                      onMouseLeave={ isMultiple ? (e) => { e.currentTarget.style.backgroundColor = 'transparent'; } : undefined }
+                    >
+                      <td><img src={tokenClass.image || 'N/A'} height="50" /></td>
                       <td>{tokenClass.symbol || 'N/A'}</td>
                       <td>{tokenClass.category || 'N/A'}</td>
                       <td>{tokenClass.collection || 'N/A'}</td>
-                      <td>{tokenClass.decimals || 'N/A'}</td>
+                      <th>{tokenClass.additionalKey}</th>
                       <td>{tokenClass.description || 'N/A'}</td>
                       <td>{tokenClass.maxSupply || 'N/A'}</td>
                       <td>
@@ -110,19 +126,23 @@ const ManageToken = () => {
           </div>
         )}
       </div>
-      {isConnected && isRegistered && tokenData ? (
+      {isConnected && isRegistered && tokenData && !isMultiple ? (
         <>
-          <GrantAllowance
-            tokenData={tokenData}
-            walletAddress={walletAddress}
-            metamaskClient={metamaskClient}
-          />
+          {tokenData.authorities && tokenData.authorities.includes(walletAddress) && (
+            <GrantAllowance
+              tokenData={tokenData}
+              walletAddress={walletAddress}
+              metamaskClient={metamaskClient}
+            />
+          )}
           <Balance
             tokenData={tokenData}
             walletAddress={walletAddress}
             metamaskClient={metamaskClient}
           />
         </>
+      ) : isMultiple ? (
+        <p>Select a token class from the list above to manage.</p>
       ) : (
         <p>Connect & Register your wallet</p>
       )}
