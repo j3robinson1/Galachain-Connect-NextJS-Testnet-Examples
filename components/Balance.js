@@ -236,7 +236,6 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
                 <thead>
                   <tr>
                     <th>Locked</th>
-                    <th>Created</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -257,7 +256,6 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
                       return (
                         <tr>
                           <td>{totalLocked > 0 ? totalLocked : 0}</td>
-                          <td>{/* Optionally, show created date here */}</td>
                         </tr>
                       );
                     })()

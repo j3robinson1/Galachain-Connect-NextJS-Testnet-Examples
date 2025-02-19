@@ -61,3 +61,214 @@ body {
 .navLink:hover {
   text-decoration: underline;
 }
+
+
+/* Global Styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+}
+
+a {
+  color: #bb86fc;
+  text-decoration: none;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Headings */
+h1, h2, h3 {
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+/* Form Styles */
+.form {
+  background-color: #2c2c2c;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+.top-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Example grid for the rest of the form fields */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+/* Token Class Row Consolidation */
+.token-class-row {
+  grid-column: 1 / -1; /* Spans the full width in a grid layout */
+}
+
+.token-class-items {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.token-class-item {
+  flex: 1;
+  min-width: 150px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+/* Button Group and Buttons */
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  background-color: #6200ee;
+  border: none;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 15px;
+}
+
+button:disabled {
+  background-color: #4a4a4a;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  background-color: #3700b3;
+}
+
+/* Notifications */
+.error {
+  color: #cf6679;
+  background-color: #3a3a3a;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.success {
+  color: #03dac6;
+  background-color: #3a3a3a;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+/* Table Styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+table th,
+table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #444;
+}
+
+table th {
+  background-color: #2c2c2c;
+  color: #ffffff;
+}
+
+table tr:hover {
+  background-color: #313131;
+  cursor: pointer;
+}
+
+.mint-token-container,
+.lock-token-container,
+.transfer-token-container,
+.transfer-gala-container,
+.burn-token-container,
+.grant-allowance-container,
+.create-token-class-container {
+  margin: 1rem 0;
+  border-radius: 8px;
+}
+
+/* Additional Elements */
+.currency {
+  margin-left: 0.5rem;
+}
+
+.fee-notice {
+  font-size: 0.85rem;
+  color: #b0b0b0;
+  margin-bottom: 0.5rem;
+}
+.token-class-item label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.token-class-item input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem;
+}
+
+.metadata {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  background: #272727;
+  padding: 30px;
+  border-radius: 10px;
+}
+
+.featured-media {
+  flex: 0 0 auto; /* Keeps the video container at its natural size */
+}
+
+.featured-media video {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.metadata ul {
+  flex: 1; /* Takes up the remaining space */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+    max-height: 235px;
+    overflow: auto;
+}
+.metadata ul li {
+    padding: 5px;
+    background: #3f3f3f;
+    margin: 5px 0px;
+    border-radius: 5px;
+}

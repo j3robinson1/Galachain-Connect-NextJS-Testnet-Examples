@@ -51,6 +51,7 @@ const ManageToken = () => {
           collection: firstTokenClass.collection,
           type: firstTokenClass.type,
           instance: firstTokenClass.instance,
+          image: firstTokenClass.image,
           owner: firstTokenClass.owner,
           id: id ? parseInt(id, 10) : undefined 
         });
@@ -108,6 +109,7 @@ const ManageToken = () => {
               <table>
                 <thead>
                   <tr>
+                    <th>Image</th>
                     <th>ID</th>
                     <th>Collection</th>
                     <th>Category</th>
@@ -117,6 +119,7 @@ const ManageToken = () => {
                 </thead>
                 <tbody>
                   <tr>
+                    <td><img src={tokenData.image || 'N/A'} height="50" /></td>
                     <td>{tokenData.id || 'N/A'}</td>
                     <td>{tokenData.collection || 'N/A'}</td>
                     <td>{tokenData.category || 'N/A'}</td>
@@ -136,10 +139,9 @@ const ManageToken = () => {
         <>
           {metadata ? (
             <div className="metadata">
-              <h2>Token Metadata</h2>
               {metadata.featured && (
                 <div className="featured-media">
-                  <video width="320" height="240" autoPlay ref={videoRef}>
+                  <video width="240" height="240" autoPlay ref={videoRef}>
                     <source src={metadata.featured} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>

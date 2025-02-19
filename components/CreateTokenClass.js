@@ -197,71 +197,76 @@ const CreateTokenClass = ({ walletAddress, metamaskClient }) => {
     <div className="create-token-class-container">
       <h2>Create / Update Token Class</h2>
       <div className="form">
-        {/* Select box for Fungible vs. Non-Fungible */}
-        <div className="input-group">
-          <label>Type</label>
-          <select
-            name="isNonFungible"
-            value={formValues.isNonFungible.toString()}
-            onChange={handleNonFungibleSelectChange}
-            disabled={isProcessing}
-          >
-            <option value="false">Token</option>
-            <option value="true">NFT</option>
-          </select>
-        </div>
-
-        {/* If Non-Fungible is selected, display NFT type dropdown */}
-        {formValues.isNonFungible && (
+        {/* Top Row: Type and NFT Type */}
+        <div className="top-row">
           <div className="input-group">
-            <label>NFT Type</label>
+            <label>Type</label>
             <select
-              name="nftType"
-              value={nftType}
-              onChange={handleNftTypeChange}
+              name="isNonFungible"
+              value={formValues.isNonFungible.toString()}
+              onChange={handleNonFungibleSelectChange}
               disabled={isProcessing}
             >
-              <option value="ERC1155">ERC1155</option>
-              <option value="ERC721">ERC721</option>
+              <option value="false">Token</option>
+              <option value="true">NFT</option>
             </select>
           </div>
-        )}
+          {formValues.isNonFungible && (
+            <div className="input-group">
+              <label>NFT Type</label>
+              <select
+                name="nftType"
+                value={nftType}
+                onChange={handleNftTypeChange}
+                disabled={isProcessing}
+              >
+                <option value="ERC1155">ERC1155</option>
+                <option value="ERC721">ERC721</option>
+              </select>
+            </div>
+          )}
+        </div>
 
-        {/* Render the rest of the form fields */}
-        {Object.keys(formValues)
-          .filter((key) => key !== "isNonFungible")
-          .map((key) => {
-            if (key === "tokenClass") {
-              return (
-                <div key={key}>
-                  {Object.keys(formValues[key]).map((subKey) => (
-                    <div key={subKey} className="input-group">
-                      <label>{subKey}</label>
-                      <input
-                        type="text"
-                        name={`${key}.${subKey}`}
-                        value={formValues[key][subKey]}
-                        onChange={handleChange}
-                        disabled={isProcessing}
-                      />
+        {/* Rest of the form fields (excluding network) */}
+        <div className="form-grid">
+          {Object.keys(formValues)
+            .filter((key) => key !== "isNonFungible" && key !== "network")
+            .map((key) => {
+              if (key === "tokenClass") {
+                return (
+                  <div key={key} className="input-group token-class-row">
+                    <div className="token-class-items">
+                      {Object.keys(formValues[key]).map((subKey) => (
+                        <div key={subKey} className="token-class-item">
+                          <label>{subKey}</label>
+                          <input
+                            type="text"
+                            name={`${key}.${subKey}`}
+                            value={formValues[key][subKey]}
+                            onChange={handleChange}
+                            disabled={isProcessing}
+                          />
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+                );
+              }
+              return (
+                <div key={key} className="input-group">
+                  <label>{key}</label>
+                  <input
+                    type="text"
+                    name={key}
+                    value={formValues[key]}
+                    onChange={handleChange}
+                    disabled={isProcessing}
+                  />
                 </div>
               );
-            }
-            return (
-              <div key={key} className="input-group">
-                <label>{key}</label>
-                <input
-                  type="text"
-                  name={key}
-                  value={formValues[key]}
-                  onChange={handleChange}
-                  disabled={isProcessing}
-                />
-              </div>
-            );
-          })}
+            })}
+        </div>
+
         <div className="button-group" style={{ display: 'flex', gap: '1rem' }}>
           <button onClick={createTokenClass} disabled={!isValidForm() || isProcessing}>
             {isProcessing ? "Processing..." : "Create Token Class"}

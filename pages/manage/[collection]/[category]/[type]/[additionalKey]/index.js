@@ -80,7 +80,6 @@ const ManageToken = () => {
                 <thead>
                   <tr>
                     <th>Image</th>
-                    <th>Symbol</th>
                     <th>Category</th>
                     <th>Collection</th>
                     <th>Additional Key</th>
@@ -96,11 +95,17 @@ const ManageToken = () => {
                       <td>{tokenClass.category || 'N/A'}</td>
                       <td>{tokenClass.collection || 'N/A'}</td>
                       <td>{tokenClass.additionalKey || 'N/A'}</td>
-                      <td>{tokenClass.description || 'N/A'}</td>
+                      <td>
+                        {tokenClass.description 
+                          ? (tokenClass.description.length > 10 
+                              ? tokenClass.description.slice(0, 10) + '...' 
+                              : tokenClass.description)
+                          : 'N/A'}
+                      </td>
                       <td>{tokenClass.maxSupply || 'N/A'}</td>
                       <td>
                         {tokenClass.authorities && tokenClass.authorities.length > 0
-                          ? tokenClass.authorities.join(', ')
+                          ? tokenClass.authorities.join(', ').slice(0, 15) + '...'
                           : 'N/A'}
                       </td>
                     </tr>

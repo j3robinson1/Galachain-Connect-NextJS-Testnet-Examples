@@ -83,6 +83,7 @@ const ListTokenClasses = () => {
             <table>
               <thead>
                 <tr>
+                  <th>Image</th>
                   <th>Symbol</th>
                   <th>Category</th>
                   <th>Collection</th>
@@ -104,14 +105,21 @@ const ListTokenClasses = () => {
                       e.currentTarget.style.backgroundColor = 'transparent';
                     }}
                   >
+                    <td><img src={tokenClass.image || 'N/A'} height="50" /></td>
                     <td>{tokenClass.symbol || 'N/A'}</td>
                     <td>{tokenClass.category || 'N/A'}</td>
                     <td>{tokenClass.collection || 'N/A'}</td>
-                    <td>{tokenClass.description || 'N/A'}</td>
+                    <td>
+                      {tokenClass.description 
+                        ? (tokenClass.description.length > 10 
+                            ? tokenClass.description.slice(0, 10) + '...' 
+                            : tokenClass.description)
+                        : 'N/A'}
+                    </td>
                     <td>{tokenClass.maxSupply || 'N/A'}</td>
                     <td>
                       {tokenClass.authorities && tokenClass.authorities.length > 0
-                        ? tokenClass.authorities.join(', ')
+                        ? tokenClass.authorities.join(', ').slice(0, 15) + '...'
                         : 'N/A'}
                     </td>
                   </tr>

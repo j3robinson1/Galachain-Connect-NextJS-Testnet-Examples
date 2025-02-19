@@ -75,21 +75,24 @@ const UnlockToken = ({ lockInfo, tokenData, walletAddress, metamaskClient }) => 
   return (
     <div className="unlock-token-container">
       <h2>Unlock Tokens</h2>
-      <div className="input-group">
-        <label>Quantity</label>
-        <input
-          type="number"
-          value={unlockQuantity}
-          onChange={handleChange}
-          placeholder="Enter quantity to unlock"
-          disabled={isProcessing}
-        />
+
+      <div className="form">
+        <div className="input-group">
+          <label>Quantity</label>
+          <input
+            type="number"
+            value={unlockQuantity}
+            onChange={handleChange}
+            placeholder="Enter quantity to unlock"
+            disabled={isProcessing}
+          />
+        </div>
+        <button onClick={unlockToken} disabled={!isValidForm() || isProcessing}>
+          {isProcessing ? 'Processing...' : 'Unlock Token'}
+        </button>
+        {error && <p className="error">{error}</p>}
+        {success && <p className="success">{success}</p>}
       </div>
-      <button onClick={unlockToken} disabled={!isValidForm() || isProcessing}>
-        {isProcessing ? 'Processing...' : 'Unlock Token'}
-      </button>
-      {error && <p className="error">{error}</p>}
-      {success && <p className="success">{success}</p>}
     </div>
   );
 };
