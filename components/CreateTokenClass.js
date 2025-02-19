@@ -119,6 +119,7 @@ const CreateTokenClass = ({ walletAddress, metamaskClient }) => {
     );
   };
 
+  // Function to create a token class by calling the CreateTokenClass endpoint
   const createTokenClass = async () => {
     if (!isValidForm() || !walletAddress) return;
 
@@ -128,12 +129,7 @@ const CreateTokenClass = ({ walletAddress, metamaskClient }) => {
 
     try {
       console.log("Form values:", formValues);
-
-      const signedDto = await metamaskClient.sign(
-        "CreateTokenClass",
-        formValues
-      );
-
+      const signedDto = await metamaskClient.sign("CreateTokenClass", formValues);
       console.log("Signed DTO:", signedDto);
 
       const response = await fetch(
@@ -151,13 +147,47 @@ const CreateTokenClass = ({ walletAddress, metamaskClient }) => {
 
       const responseData = await response.json();
       console.log("Token class created successfully:", responseData);
-
       setSuccess(`Token class "${formValues.name}" created successfully!`);
     } catch (err) {
       console.error(`Error creating token class: ${err}`, err);
-      setError(
-        err instanceof Error ? err.message : "Failed to create token class"
+      setError(err instanceof Error ? err.message : "Failed to create token class");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Function to update a token class by calling the UpdateTokenClass endpoint
+  const updateTokenClass = async () => {
+    if (!isValidForm() || !walletAddress) return;
+
+    setError("");
+    setSuccess("");
+    setIsProcessing(true);
+
+    try {
+      console.log("Form values:", formValues);
+      const signedDto = await metamaskClient.sign("UpdateTokenClass", formValues);
+      console.log("Signed DTO:", signedDto);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_TESTNET_TOKEN_CONTRACT}/UpdateTokenClass`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(signedDto),
+        }
       );
+
+      if (!response.ok) {
+        throw new Error("Failed to update token class");
+      }
+
+      const responseData = await response.json();
+      console.log("Token class updated successfully:", responseData);
+      setSuccess(`Token class "${formValues.name}" updated successfully!`);
+    } catch (err) {
+      console.error(`Error updating token class: ${err}`, err);
+      setError(err instanceof Error ? err.message : "Failed to update token class");
     } finally {
       setIsProcessing(false);
     }
@@ -165,7 +195,7 @@ const CreateTokenClass = ({ walletAddress, metamaskClient }) => {
 
   return (
     <div className="create-token-class-container">
-      <h2>Create Token Class</h2>
+      <h2>Create / Update Token Class</h2>
       <div className="form">
         {/* Select box for Fungible vs. Non-Fungible */}
         <div className="input-group">
@@ -232,9 +262,14 @@ const CreateTokenClass = ({ walletAddress, metamaskClient }) => {
               </div>
             );
           })}
-        <button onClick={createTokenClass} disabled={!isValidForm() || isProcessing}>
-          {isProcessing ? "Processing..." : "Create Token Class"}
-        </button>
+        <div className="button-group" style={{ display: 'flex', gap: '1rem' }}>
+          <button onClick={createTokenClass} disabled={!isValidForm() || isProcessing}>
+            {isProcessing ? "Processing..." : "Create Token Class"}
+          </button>
+          <button onClick={updateTokenClass} disabled={!isValidForm() || isProcessing}>
+            {isProcessing ? "Processing..." : "Update Token Class"}
+          </button>
+        </div>
         {error && <p className="error">{error}</p>}
         {success && <p className="success">{success}</p>}
       </div>
