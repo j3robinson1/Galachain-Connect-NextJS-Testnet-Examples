@@ -52,6 +52,7 @@ const ManageToken = () => {
           collection: firstTokenClass.collection,
           type: firstTokenClass.type,
           instance: firstTokenClass.instance,
+          id: firstTokenClass?.instance || '0',
           authorities: firstTokenClass.authorities
         });
       }

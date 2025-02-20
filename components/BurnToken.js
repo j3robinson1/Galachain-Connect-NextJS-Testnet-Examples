@@ -11,7 +11,7 @@ const BurnToken = ({ tokenData, walletAddress, metamaskClient }) => {
           additionalKey: tokenData.additionalKey,
           category: tokenData.category,
           collection: tokenData.collection,
-          instance: '0',
+          instance: tokenData?.id || '0',
           type: tokenData.type,
         },
       },

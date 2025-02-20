@@ -53,7 +53,7 @@ const ManageToken = () => {
           instance: firstTokenClass.instance,
           image: firstTokenClass.image,
           owner: firstTokenClass.owner,
-          id: id ? parseInt(id, 10) : undefined 
+          id: id
         });
       }
     } catch (err) {

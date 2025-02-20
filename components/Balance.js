@@ -33,7 +33,7 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
             collection: tokenData.collection,
             grantedTo: walletAddress,
             type: tokenData.type,
-            instance: '0',
+            instance: tokenData?.id || '0',
           }),
         }
       );
@@ -67,7 +67,7 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
             collection: tokenData.collection,
             grantedTo: walletAddress,
             type: tokenData.type,
-            instance: '0',
+            instance: tokenData?.id || '0',
           }),
         }
       );
@@ -117,7 +117,7 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
             collection: tokenData.collection,
             grantedTo: walletAddress,
             type: tokenData.type,
-            instance: '0',
+            instance: tokenData?.id || '0',
           }),
         }
       );
@@ -141,8 +141,8 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
   }, [tokenData, walletAddress]);
 
   function compileLockName(lockedHold) {
-    const { collection, category, type } = tokenData;
-    const instanceId = lockedHold.instanceId || '0';
+    const { collection, category, type, id } = tokenData;
+    const instanceId = lockedHold.instanceId || id || '0';
     const quantity = lockedHold.quantity || '0';
     const lockAuthority = lockedHold.lockAuthority || walletAddress;
     const owner = walletAddress;
@@ -341,7 +341,7 @@ const Balance = ({ tokenData, walletAddress, metamaskClient }) => {
                 quantity: totalLockedQuantity,
                 lockAuthority: walletAddress,
                 name: compileLockName({
-                  instanceId: '0',
+                  instanceId: tokenData?.id || '0',
                   quantity: totalLockedQuantity,
                   lockAuthority: walletAddress,
                   created: new Date().getTime(),

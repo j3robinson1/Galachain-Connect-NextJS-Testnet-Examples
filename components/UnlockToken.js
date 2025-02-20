@@ -37,7 +37,7 @@ const UnlockToken = ({ lockInfo, tokenData, walletAddress, metamaskClient }) => 
           additionalKey: tokenData.additionalKey,
           category: tokenData.category,
           collection: tokenData.collection,
-          instance: lockInfo.instanceId || '0',
+          instance: lockInfo?.instanceId || '0',
           type: tokenData.type,
         },
         uniqueKey: `unlock-${lockInfo.name}`,
