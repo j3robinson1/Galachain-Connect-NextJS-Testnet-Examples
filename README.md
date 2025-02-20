@@ -33,11 +33,17 @@ pnpm install
 Create a `.env` file in the root directory and add the following:
 
 ```plaintext
-NEXT_PUBLIC_TESTNET_PUBLIC_KEY_CONTRACT='https://gateway-testnet.galachain.com/<api root public key contract>'
-NEXT_PUBLIC_TESTNET_TOKEN_CONTRACT='https://gateway-testnet.galachain.com/<api root token contract>'
-PRIVATE_KEY=<your private key>
+NEXT_PUBLIC_TESTNET_PUBLIC_KEY_CONTRACT='https://gateway-testnet.galachain.com/api/testnet03/gc-bf369906e680527735ef1a8571a71318f3ebacb9-PublicKeyContract'
+NEXT_PUBLIC_TESTNET_TOKEN_CONTRACT='https://gateway-testnet.galachain.com/api/testnet03/gc-bf369906e680527735ef1a8571a71318f3ebacb9-GalaChainToken'
+PRIVATE_KEY=<Testnet Admin Private Key>
+NEXT_PUBLIC_ASSET_PUBLIC_KEY_CONTRACT='https://api-galaswap.gala.com/galachain/api/asset/public-key-contract'
+NEXT_PUBLIC_ASSET_TESTNET_TOKEN_CONTRACT='https://galachain-gateway-chain-platform.ue1.tnt.galachain.com/api/testnet01/gc-a9b8b472b035c0510508c248d1110d3162b7e5f4-GalaChainToken'
+NEXT_PUBLIC_ASSET_MAINNET_TOKEN_CONTRACT='https://galachain-gateway-chain-platform-prod-chain-platform-eks.prod.galachain.com/api/asset/token-contract'
+NEXT_PUBLIC_ASSET_TESTNET_PUBLIC_KEY_CONTRACT='https://galachain-gateway-chain-platform.ue1.tnt.galachain.com/api/testnet01/gc-a9b8b472b035c0510508c248d1110d3162b7e5f4-PublicKeyContract'
+NEXT_PUBLIC_GALASWAP_API=https://api-galaswap.gala.com/v1
 ```
-Replace <your project id> with your actual project ID.
+Replace <Testnet Admin Private Key> with your actual testnet deployment admin key.
+Replace Testnet urls with your Testnet URLs.
 
 ## Start the Development Server
 
@@ -48,18 +54,6 @@ yarn dev
 # or
 pnpm dev
 ```
-
-## Features
-
-- **MetaMask Wallet Connection:** Seamlessly connect your MetaMask wallet.
-
-## Project Structure
-
-- `pages/index.js` - The main entry point for the application.
-- `components/`
-  - `WalletConnect.js` - Manages wallet connections and interactions.
-
-Environment variables are defined in `.env`. Next.js configuration is managed through `next.config.js`.
 
 ## Development
 
