@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DownloadSampleFile from './DownloadSampleFile';
 
 const CreateTokenClass = ({ walletAddress, metamaskClient }) => {
   // Helper to get default form values based on token type
@@ -75,6 +76,8 @@ const CreateTokenClass = ({ walletAddress, metamaskClient }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  // State for master JSON upload (for ERC721 only)
+  const [masterJson, setMasterJson] = useState(null);
 
   // For updating text inputs inside formValues (including tokenClass fields)
   const handleChange = (e) => {
@@ -109,6 +112,59 @@ const CreateTokenClass = ({ walletAddress, metamaskClient }) => {
     setNftType(newNftType);
     const newDefaults = getDefaultFormValues(true, newNftType);
     setFormValues(newDefaults);
+  };
+
+  // Handle file input for master JSON upload
+  const handleMasterFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const parsed = JSON.parse(event.target.result);
+          if (Array.isArray(parsed)) {
+            setMasterJson(parsed);
+          } else {
+            alert("JSON file must contain an array of metadata objects");
+          }
+        } catch (err) {
+          console.error("Error parsing JSON file", err);
+          alert("Error parsing JSON file");
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  // Function to upload each metadata object separately
+  const uploadMetadataFiles = async () => {
+    if (!masterJson || masterJson.length === 0) return;
+    // We intentionally do NOT set isProcessing here to true again,
+    // because we might want to show the user that the token creation was successful
+    // and that we are now uploading. Feel free to adjust as needed.
+    try {
+      // Determine collection folder name from form values
+      const collection = formValues.tokenClass.collection;
+      // Loop over each metadata object and upload it separately
+      for (let i = 0; i < masterJson.length; i++) {
+        const metadataObj = masterJson[i];
+        const id = i + 1;
+        // Here you would send a request to your backend API that writes the file to:
+        // /metadata/[collection]/[id].json
+        const response = await fetch(`/api/uploadMetadata`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ collection, id, metadata: metadataObj }),
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to upload metadata file for ID ${id}`);
+        }
+      }
+      alert("Master JSON metadata uploaded successfully.");
+    } catch (err) {
+      console.error("Metadata upload error:", err);
+      alert(`Token class created, but metadata upload failed: ${err.message}`);
+    }
   };
 
   const isValidForm = () => {
@@ -148,6 +204,16 @@ const CreateTokenClass = ({ walletAddress, metamaskClient }) => {
       const responseData = await response.json();
       console.log("Token class created successfully:", responseData);
       setSuccess(`Token class "${formValues.name}" created successfully!`);
+
+      // Only upload metadata if ERC721, we have a master JSON, and creation was successful
+      if (
+        formValues.isNonFungible &&
+        nftType === "ERC721" &&
+        masterJson &&
+        masterJson.length > 0
+      ) {
+        await uploadMetadataFiles();
+      }
     } catch (err) {
       console.error(`Error creating token class: ${err}`, err);
       setError(err instanceof Error ? err.message : "Failed to create token class");
@@ -227,6 +293,30 @@ const CreateTokenClass = ({ walletAddress, metamaskClient }) => {
           )}
         </div>
 
+        {/* If ERC721 is selected, show master JSON upload row */}
+        {formValues.isNonFungible && nftType === "ERC721" && (
+          <>
+            <DownloadSampleFile />
+            <div
+              className="master-json-upload-row"
+              style={{
+                margin: "1rem 0",
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+              }}
+            >
+              <label>Upload Master JSON File:</label>
+              <input
+                type="file"
+                accept="application/json"
+                onChange={handleMasterFileUpload}
+                disabled={isProcessing}
+              />
+            </div>
+          </>
+        )}
+
         {/* Rest of the form fields (excluding network) */}
         <div className="form-grid">
           {Object.keys(formValues)
@@ -267,7 +357,10 @@ const CreateTokenClass = ({ walletAddress, metamaskClient }) => {
             })}
         </div>
 
-        <div className="button-group" style={{ display: 'flex', gap: '1rem' }}>
+        <div
+          className="button-group"
+          style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}
+        >
           <button onClick={createTokenClass} disabled={!isValidForm() || isProcessing}>
             {isProcessing ? "Processing..." : "Create Token Class"}
           </button>

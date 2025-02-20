@@ -141,10 +141,14 @@ const ManageToken = () => {
             <div className="metadata">
               {metadata.featured && (
                 <div className="featured-media">
-                  <video width="240" height="240" autoPlay ref={videoRef}>
-                    <source src={metadata.featured} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
+                  {metadata.featured.endsWith('.mp4') ? (
+                    <video width="240" height="240" autoPlay ref={videoRef}>
+                      <source src={metadata.featured} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <img src={metadata.featured} width="240" height="240" alt="Featured media" />
+                  )}
                 </div>
               )}
               {metadata.attributes && (
